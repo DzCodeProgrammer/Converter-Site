@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  conversions Conversion[]
+  
+  @@map("users")
+}
+
+model Conversion {
+  id           String           @id @default(cuid())
+  inputKey     String
+  outputKey    String?
+  filename     String
+  originalName String
+  inputFormat  String
+  outputFormat String
+  fileSize     Int
+  status       ConversionStatus @default(PENDING)
+  progress     Int              @default(0)
+  error        String?
+  downloadUrl  String?
+  userId       String?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+  completedAt  DateTime?
+  
+  user User? @relation(fields: [userId], references: [id])
+  
+  @@map("conversions")
+}
+
+enum ConversionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
